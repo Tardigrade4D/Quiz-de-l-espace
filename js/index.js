@@ -5,7 +5,7 @@
 // La variable historique qu'on mettra à jour durant le quiz.
 // Initialement, elle aura la valeur retournée par recupererHistorique()
 let historique = recupererHistorique();
-console.log(historique)
+// console.log(historique)
 /**
  * Récupère et retourne le tableau de l'historique de quiz de localStorage
  * s'il y en a un (retourne un tableau vide sinon.)
