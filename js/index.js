@@ -13,7 +13,7 @@ console.log(historique)
  */
 function recupererHistorique() {
     // On vérifie s'il y a un historique dans localStorage
-    let historiqueChaine = localStorage.getItem('super-quiz-historique');
+    let historiqueChaine = localStorage.getItem('historique-quiz');
     // On retourne l'historique décodé en JS ou un tableau vide
     return JSON.parse(historiqueChaine) || []; //Parse transforme une chaine en élément javascript
 }
@@ -24,6 +24,8 @@ function recupererHistorique() {
 
 //Variables du quiz
 let noQuestion = 0; //Le no de la prochaine question
+let nombrePoint = 0; //Le no de bonne réponses
+let bonneReponse = 0; //La no de la position de la bonne réponse
 
 //La section du quiz et sa position sur l'axe des X
 let laSection = document.querySelector("section");
@@ -31,6 +33,12 @@ let positionX = 100;
 //Les balises pour afficher les titres des questions et les choix de
 let titreQuestion = document.querySelector(".titre-question");
 let lesChoixDeReponses = document.querySelector(".les-choix-de-reponse");
+
+//Variables pour le curseur personnalisé
+let leRoot = document.querySelector(":root");
+let leCurseur = document.querySelector(".curseur");
+//Mettre un gestionnaire d'événement sur le document pour le déplacement de la souris
+document.addEventListener("mousemove", deplacerCurseur);
 
 /*///////////////////////////////////////////////////////////////////////
                             DÉBUT DU QUIZ
@@ -46,6 +54,18 @@ titreIntro.addEventListener("animationend", afficherConsignePourDebuterLeJeu);
 ///////////////////////////////////////////////////////////////////////*/
 
 /**
+ * Fonction permettant de déplacer le curseur à l'endroit du
+ * pointeur de la souris dans l'écran
+ */
+    function deplacerCurseur(event) {
+    //Coordonnées X et Y du pointeur officiel de la souris
+    //On change ici les valeurs des variables CSS déclarées
+    leRoot.style.setProperty("--mouse-x", event.clientX + "px");
+    leRoot.style.setProperty("--mouse-y", event.clientY + "px");
+}
+
+
+/**
  * Fonction pour afficher les consignes pour débuter le jeu
  *
  * @param {Event} event : objet AnimationEvent de l'événement distribué
@@ -53,10 +73,10 @@ titreIntro.addEventListener("animationend", afficherConsignePourDebuterLeJeu);
 function afficherConsignePourDebuterLeJeu(event) {
     //console.log(event.animationName);
     //On affiche la consigne si c'est la fin de la deuxième animation: etirer-mot
-    if (event.animationName == "etirer-mot") {
+    if (event.animationName == "monter-mot") {
         //On affiche un message dans le pied de page
         let piedDePage = document.querySelector("footer");
-        piedDePage.innerHTML = "<h1>Cliquer dans l'écran pour commencer le quiz</h1>";
+        piedDePage.innerHTML = "<h1>Clique nimporte ou pour commencer le quiz</h1>";
 
         //On met un écouteur sur la fenêtre pour enlever l'intro et commencer le quiz
         window.addEventListener("click", commencerLeQuiz);
@@ -64,14 +84,11 @@ function afficherConsignePourDebuterLeJeu(event) {
 }
 
 /**
- * Fonction pour enlever les éléments de l'intro et commencer le quiz
- *
- */
+    Fonction pour enlever les éléments de l'intro et commencer le quiz
+*/
 function commencerLeQuiz() {
-    // [CODE LOCALSTORAGE]
     // Nouvelle partie : on consigne dans la variable historique en créant
     // et initialisant un nouvel objet dans le tableau historique.
-    // (date formatée, et un tableau des réponses vide pour le moment)
     historique.push(
         {
             date: new Date().toLocaleDateString('fr-CA'),
@@ -80,7 +97,7 @@ function commencerLeQuiz() {
     );
 
     // Modifier la valeur stockée dans localStorage
-    localStorage.setItem('super-quiz-historique', JSON.stringify(historique))
+    localStorage.setItem('historique-quiz', JSON.stringify(historique))
 
     //On enlève le conteneur de l'intro
     let intro = document.querySelector("main.intro");
@@ -103,10 +120,11 @@ function commencerLeQuiz() {
 function afficherQuestion() {
     //Récupérer l'objet de la question en cours
     let objetQuestion = lesQuestions[noQuestion];
-    //console.log(objetQuestion);
+    // console.log(objetQuestion);
 
     //On affiche le titre de la question
     titreQuestion.innerText = objetQuestion.titre;
+    //console.log(objetQuestion)
 
     //On crée et on affiche les balises des choix de réponse
     //Mais d'abord on enlève le contenu actuel
@@ -166,7 +184,15 @@ function verifierReponse(event) {
     historique[historique.length-1].reponses.push(event.target.indexChoix);
 
     // On sauvegarde le nouvel historique dans localStorage.
-    localStorage.setItem('super-quiz-historique', JSON.stringify(historique));
+    localStorage.setItem('historique-quiz', JSON.stringify(historique));
+
+    //Récupérer l'objet de la question en cours
+    let objetQuestion = lesQuestions[noQuestion];
+    //Comparer la réponse donner à la bonne réponse
+    if (event.target.indexChoix == objetQuestion.bonneReponse) {
+        nombrePoint++;//Si la réponse est bonne on augmente le nombre de points
+    }
+    console.log(objetQuestion.bonneReponse)
 
     //Plusiers choses peuvent être effectuées ici, mais pour l'instant
     //on va uniquement afficher la prochaine question

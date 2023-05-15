@@ -8,28 +8,28 @@
 
 let lesQuestions = [
     {
-        titre: "Question 1 - Trouvez la somme de 2 + 3?",
-        choix: [5, 7, 4],
-        bonneReponse: 0
+        titre: "En quelle année Pluton n'étais plus considérer comme une planète ?",
+        choix: [2006, 2002, 2010],
+        bonneReponse: 0,
     },
     {
-        titre: "Question 2 - Trouvez le produit de 2 * 3?",
-        choix: [4, 8, 6],
-        bonneReponse: 2
+        titre: "Quelle est la distance entre la terre et la lune (en 1000km) ?",
+        choix: [245, 860, 384],
+        bonneReponse: 2,
     },
     {
-        titre: "Question 3 - Trouvez le quotient de 18 ÷ 3",
-        choix: [9, 6, 5],
+        titre: "Combien de lune la planète Mars possède t'elle ?",
+        choix: [0, 2, 4],
         bonneReponse: 1,
     },
     {
-        titre: "Question 4 - Trouvez le quotient de 12 ÷ 2",
-        choix: [4, 8, 6],
-        bonneReponse: 2
+        titre: "Quelle est la température à la surface du soleil en °C ?",
+        choix: [2700, 4600, 5500],
+        bonneReponse: 2,
     },
     {
-        titre: "Question 5 - Trouvez le produit de 3 * 3",
-        choix: [9, 6, 12],
-        bonneReponse: 0
+        titre: "Quelle est la durée d'une année sur Neptune (en année terrestre)",
+        choix: [165, 30, 365],
+        bonneReponse: 0,
     }
 ]
