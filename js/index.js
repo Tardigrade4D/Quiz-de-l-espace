@@ -25,7 +25,18 @@ function recupererHistorique() {
 //Variables du quiz
 let noQuestion = 0; //Le no de la prochaine question
 let nombrePoint = 0; //Le no de bonne réponses
-let bonneReponse = 0; //La no de la position de la bonne réponse
+
+//index de l'image de fond pour lesChoixDeReponses
+let indexImageFond = 0;
+//Tableau pour changer l'image de fond de lesChoixDeReponses dynamiquement
+let imageDeFond = new Array(
+    "/images/fi1.jpg",
+    "/images/fi2.jpg",
+    "/images/fi3.jpg",
+    "/images/fi4.jpg",
+    "/images/fi5.jpg",
+);
+
 
 //La section du quiz et sa position sur l'axe des X
 let laSection = document.querySelector("section");
@@ -33,6 +44,14 @@ let positionX = 100;
 //Les balises pour afficher les titres des questions et les choix de
 let titreQuestion = document.querySelector(".titre-question");
 let lesChoixDeReponses = document.querySelector(".les-choix-de-reponse");
+//La balise pour afficher le nombre de points
+let leNombreDePoints = document.querySelector(".nombre-points");
+
+//L'audio (source: https://mixkit.co/free-sound-effects/)
+let audio = {
+    vrai: new Audio('sons/vrai.wav'),
+    faux: new Audio('sons/faux.wav')
+};
 
 //Variables pour le curseur personnalisé
 let leRoot = document.querySelector(":root");
@@ -71,12 +90,11 @@ titreIntro.addEventListener("animationend", afficherConsignePourDebuterLeJeu);
  * @param {Event} event : objet AnimationEvent de l'événement distribué
  */
 function afficherConsignePourDebuterLeJeu(event) {
-    //console.log(event.animationName);
-    //On affiche la consigne si c'est la fin de la deuxième animation: etirer-mot
+    //On affiche la consigne si c'est la fin de la deuxième animation: montrer-mot
     if (event.animationName == "monter-mot") {
         //On affiche un message dans le pied de page
         let piedDePage = document.querySelector("footer");
-        piedDePage.innerHTML = "<h1>Clique nimporte ou pour commencer le quiz</h1>";
+        piedDePage.innerHTML = "<h1>Clique n'importe ou pour commencer le quiz</h1>";
 
         //On met un écouteur sur la fenêtre pour enlever l'intro et commencer le quiz
         window.addEventListener("click", commencerLeQuiz);
@@ -118,9 +136,10 @@ function commencerLeQuiz() {
  *
  */
 function afficherQuestion() {
+    //On retire la classe désactiver de la liste des choix de reponses
+    lesChoixDeReponses.classList.remove("desactiver");
     //Récupérer l'objet de la question en cours
     let objetQuestion = lesQuestions[noQuestion];
-    // console.log(objetQuestion);
 
     //On affiche le titre de la question
     titreQuestion.innerText = objetQuestion.titre;
@@ -141,10 +160,15 @@ function afficherQuestion() {
         //On affecte dynamiquement l'index de chaque choix
         unChoix.indexChoix = i;
 
-        //On met un écouteur pour vérifier la réponse choisie
-        unChoix.addEventListener("mousedown", verifierReponse);
-
-        //Enfin on affiche ce choix
+        //On écoute si unChoix est cliquer
+        unChoix.addEventListener("mousedown", function(event) {
+            if (lesChoixDeReponses.classList.contains("desactiver")) {
+              return; // Si unChoix a la classe desactiver, on fais rien, c'est pour éviter que l'utilisateur puisse donner plusieurs réponses à la même question
+            }
+            lesChoixDeReponses.classList.add("desactiver"); // Quand unChoix est cliquer, on lui applique la classe désactiver
+        
+            verifierReponse(event) // Quand unChoix est cliquer, on vérifie la réponse
+        });
         lesChoixDeReponses.append(unChoix);
     }
 
@@ -153,23 +177,23 @@ function afficherQuestion() {
     positionX = 100;
 
     //Partir la première requête pour l'animation de la section
-    requestAnimationFrame(animerSection);
+    requestAnimationFrame(animerSectionEntrer);
 }
 
-/**
- * Fonction permettant d'animer l'arrivée de la section
- *
- */
-function animerSection() {
+/*
+    Fonction permettant d'animer l'arrivée de la section
+*/
+function animerSectionEntrer() {
     //On décrémente la position de 2
     positionX -= 2;
     laSection.style.transform = `translateX(${positionX}vw)`;
 
-    //On part une autre requête  d'animation si la position n'est pas atteinte
+    //On part une autre requête d'animation si la position n'est pas atteinte
     if (positionX > 0) {
-        requestAnimationFrame(animerSection);
+        requestAnimationFrame(animerSectionEntrer);
     }
 }
+
 
 /**
  * Fonction permettant de vérifier la réponse choisie et de gérer la suite
@@ -181,22 +205,41 @@ function verifierReponse(event) {
     // On modifie l'historique pour ajouter ce choix dans le tableau des réponses
     // Remarquer qu'il faut modifier uniquement le dernier objet du tableau
     // historique.
-    historique[historique.length-1].reponses.push(event.target.indexChoix);
+    //On affecte la valeur du nombre du point au tableau des réponses
+    historique[historique.length-1].reponses = nombrePoint;
 
     // On sauvegarde le nouvel historique dans localStorage.
     localStorage.setItem('historique-quiz', JSON.stringify(historique));
 
+    //Récupérer l'objet de la réponse choisi
+    let unChoix = event.target;
+
     //Récupérer l'objet de la question en cours
     let objetQuestion = lesQuestions[noQuestion];
+    //Variable pour gerer les sons, au départ, on assume que la réponse est mauvaise
+    let etatVerif = 'faux';
     //Comparer la réponse donner à la bonne réponse
     if (event.target.indexChoix == objetQuestion.bonneReponse) {
         nombrePoint++;//Si la réponse est bonne on augmente le nombre de points
+        etatVerif = 'vrai';//On met le son de la bonne réponse
+        unChoix.classList.add("choixVrai");//On met la classe qui correspond à la bonne réponse
     }
-    console.log(objetQuestion.bonneReponse)
+    else {
+        unChoix.classList.add("choixFaux");//Sinon, la réponse est fausse, on met la classe qui correspond à la mauvaise réponse
+    }
 
-    //Plusiers choses peuvent être effectuées ici, mais pour l'instant
-    //on va uniquement afficher la prochaine question
-    gererProchaineQuestion();
+    // En fin de compte, on peut jouer le son correspondant à l'état de la 
+    // vérification ('faux' ou 'vrai') ...
+    audio[etatVerif].play();
+    // ... on rembobine vite le son pour qu'il puisse être 're-joué' même en rafale :
+    audio[etatVerif].currentTime = 0;
+
+    //On afficher le nombre de points dans le header
+    let messageScore = 'Ton score est de: '+nombrePoint+'/5';
+    leNombreDePoints.innerText = messageScore;
+
+    //On affiche la prochaine question avec un delai de 2 secondes
+    setTimeout(gererProchaineQuestion, 2000)
 }
 
 /**
@@ -209,6 +252,9 @@ function gererProchaineQuestion() {
 
     //S'il reste une question on l'affiche, sinon c'est la fin du jeu...
     if (noQuestion < lesQuestions.length) {
+        lesChoixDeReponses.style.backgroundImage = 'url("'+imageDeFond[indexImageFond+1]+'")'; //On applique la nouvelle image de fond à lesChoixDeReponses
+        indexImageFond++; //On augmente l'index 1 pour passer à l'image suivante
+
         //On affiche la prochaine question
         afficherQuestion();
     } else {
@@ -223,22 +269,23 @@ function gererProchaineQuestion() {
  */
 function afficherFinQuiz() {
     let zoneFinQuiz = document.querySelector(".fin");
+
     //On enlève le quiz de l'affichage et on affiche la fin du jeu
     document.querySelector(".quiz").style.display = "none";
     zoneFinQuiz.style.display = "flex";
 
     // [CODE LOCALSTORAGE]
     // Obtenir la dernière version sauvegardée de l'historique
-    // historique;
     let nombreParties = historique.length;
-    zoneFinQuiz.innerHTML = `<p>Nombre de partie(s) jouée(s) : ${nombreParties}</p>`;
-    zoneFinQuiz.innerHTML += `<p>Liste des réponses à toutes les parties jouées : </p>`;
-    //zoneFinQuiz.innerHTML += "<ol>";
+    zoneFinQuiz.innerHTML = `<p>Fin du quiz !</p>`;
+    zoneFinQuiz.innerHTML += `<p>Tu as jouée(s) : ${nombreParties} partie(s)</p>`;
+    zoneFinQuiz.innerHTML += `<p>Liste des scores à toutes les parties jouées : </p>`;
+
+    //Afficher les données 
     for (let partie of historique) {
         zoneFinQuiz.innerHTML += "<p>";
-        zoneFinQuiz.innerHTML += `Date : ${partie.date}`;
-        zoneFinQuiz.innerHTML += `Réponses : ${partie.reponses}`;
+        zoneFinQuiz.innerHTML += `Tu as jouer une partie le : ${partie.date}&nbsp`;
+        zoneFinQuiz.innerHTML += `Ton score étais de : ${partie.reponses}/5`;
         zoneFinQuiz.innerHTML += "</p>";
     }
-    //zoneFinQuiz.innerHTML += "</ol>";
 }

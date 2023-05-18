@@ -8,17 +8,17 @@
 
 let lesQuestions = [
     {
-        titre: "En quelle année Pluton n'étais plus considérer comme une planète ?",
+        titre: "En quelle année Pluton n'était plus considérée comme une planète ?",
         choix: [2006, 2002, 2010],
         bonneReponse: 0,
     },
     {
-        titre: "Quelle est la distance entre la terre et la lune (en 1000km) ?",
+        titre: "Quelle est la distance entre la Terre et la Lune (en 1000km) ?",
         choix: [245, 860, 384],
         bonneReponse: 2,
     },
     {
-        titre: "Combien de lune la planète Mars possède t'elle ?",
+        titre: "Combien de Lunes la planète Mars possède-t-elle ?",
         choix: [0, 2, 4],
         bonneReponse: 1,
     },
@@ -28,7 +28,7 @@ let lesQuestions = [
         bonneReponse: 2,
     },
     {
-        titre: "Quelle est la durée d'une année sur Neptune (en année terrestre)",
+        titre: "Quelle est la durée d'une année sur Neptune (en années terrestres) ?",
         choix: [165, 30, 365],
         bonneReponse: 0,
     }
